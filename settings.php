@@ -38,6 +38,17 @@ page_head('Configuración · Limpieza', 'settings'); ?>
     <button class="primary" type="submit">Añadir</button>
   </form>
 </section>
+<section class="card narrow" style="margin-top:16px">
+  <h2>Base de datos</h2>
+  <p class="hint">Ahora estás usando: <b><?= htmlspecialchars(active_db_name()) ?></b> <?= is_demo() ? '(pruebas)' : '(real)' ?>.
+    La base de pruebas es una copia independiente con datos de ejemplo, ideal para probar sin miedo. El cambio solo afecta a este navegador.</p>
+  <div class="actions">
+    <button id="mode-btn" type="button" data-mode="<?= is_demo() ? 'real' : 'demo' ?>" class="<?= is_demo() ? 'primary' : '' ?>">
+      <?= is_demo() ? 'Volver a la base REAL' : 'Cambiar a la base de PRUEBAS' ?></button>
+    <?php if (is_demo()): ?><button id="demo-reset" type="button">Restaurar datos de ejemplo</button><?php endif; ?>
+  </div>
+</section>
+
 <section class="card narrow danger" style="margin-top:16px">
   <h2>Zona de peligro</h2>
   <p class="hint">Borra todos los pedidos, días y pagos registrados. No se puede deshacer: haz antes una copia de seguridad si quieres conservarlos.</p>

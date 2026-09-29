@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/db.php';
 function page_head(string $title, string $active): void { ?>
 <!doctype html>
 <html lang="es">
@@ -9,6 +10,9 @@ function page_head(string $title, string $active): void { ?>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
+<?php if (is_demo()): ?>
+<div class="demo-banner">🧪 MODO PRUEBAS — estás usando la base de datos de ejemplo (<b><?= htmlspecialchars(active_db_name()) ?></b>), no la real.</div>
+<?php endif; ?>
 <header class="top">
   <h1>🧹 Gastos de limpieza</h1>
   <nav>

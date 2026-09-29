@@ -28,11 +28,13 @@ page_head('Calendario · Limpieza', 'home'); ?>
       <div><span id="sum-days">0</span> días · <span id="sum-hours">0</span> h</div>
       <div class="amount"><span id="total">0,00</span> €</div>
     </div>
-    <div class="pay-box three">
-      <div><span>Total a pagar</span><b id="due-total">0,00 €</b></div>
+    <div class="pay-box four">
+      <div><span>Arrastre anterior</span><b id="carry-in">0,00 €</b></div>
+      <div><span>Total del mes</span><b id="due-total">0,00 €</b></div>
       <div><span>Pagado realmente</span><b id="paid-real">0,00 €</b></div>
-      <div><span>Pendiente del mes</span><b id="pending-total" class="acc">0,00 €</b></div>
+      <div><span>Pendiente</span><b id="pending-total" class="acc">0,00 €</b></div>
     </div>
+    <p class="hint" id="carry-note"></p>
     <p class="hint" id="balance-all"></p>
     <ul id="payments" class="hol-list big"></ul>
     <div class="actions">

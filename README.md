@@ -72,7 +72,10 @@ Si quieres ver la app con datos antes de meter los tuyos, hay un fichero con dat
 mysql -u root home_clean_calculator < demo/demo_data.sql
 ```
 
-> Importa el ejemplo **con la base vacía**. Cuando quieras empezar con tus datos reales: **Configuración → Borrar todos los datos**.
+### Base de pruebas integrada
+Sin importar nada a mano: en **Configuración → Base de datos** pulsa **Cambiar a la base de PRUEBAS**. La app crea sola una segunda base (`home_clean_calculator_demo`) con los datos de ejemplo. Mientras estés en pruebas verás un aviso naranja arriba en todas las pantallas. Puedes volver a la base real cuando quieras, y **Restaurar datos de ejemplo** deja la de pruebas como nueva. El cambio se guarda por navegador, y tu base real no se toca.
+
+> Si importas el fichero de ejemplo a mano, hazlo **con la base vacía**. Cuando quieras empezar con tus datos reales: **Configuración → Borrar todos los datos**.
 
 ---
 

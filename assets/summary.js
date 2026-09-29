@@ -25,9 +25,10 @@ const year = +q.get('year') || now.getFullYear(), month = +q.get('month') || now
   const total = closed ? s.total : s.lines.reduce((a, l) => a + amt(l), 0);
   const paid = s.paid_real;
   $('s-lines').querySelector('tfoot').innerHTML = `<tr><td>${s.lines.length} día${s.lines.length === 1 ? '' : 's'}</td><td class="r">${hours.toLocaleString('es-ES')}</td><td></td><td class="r">${fmt(total)}</td><td></td></tr>`;
-  $('s-boxes').innerHTML = `<div><span>Total</span><b>${fmt(total)}</b></div><div><span>Pagado realmente</span><b>${fmt(paid)}</b></div>
-    <div><span>Pendiente</span><b class="acc">${fmt(total - paid)}</b></div>
-    <div><span>Media por día</span><b>${s.lines.length ? fmt(total / s.lines.length) : '—'}</b></div>`;
+  const carry = s.carry_in;
+  $('s-boxes').innerHTML = `<div><span>Arrastre anterior</span><b>${fmt(carry)}</b></div><div><span>Total del mes</span><b>${fmt(total)}</b></div>
+    <div><span>Pagado realmente</span><b>${fmt(paid)}</b></div>
+    <div><span>Pendiente (saldo)</span><b class="acc">${fmt(carry + total - paid)}</b></div>`;
   $('s-payments').innerHTML = s.payments.length ? '<h3>Pagos del mes</h3>' + s.payments.map(p =>
     `<div class="prow"><span>${p.date.split('-').reverse().join('/')}</span><span>${p.days} día${p.days === 1 ? '' : 's'}${p.note ? ' · ' + p.note.replace(/</g, '&lt;') : ''}</span><b>${fmt(p.amount)}</b></div>`).join('') : '';
   $('s-notes').textContent = closed && s.closed_at ? `Pedido cerrado el ${new Date(s.closed_at.replace(' ', 'T')).toLocaleDateString('es-ES')}.` : '';

@@ -8,6 +8,16 @@ function out($data, int $code = 200): never {
     exit;
 }
 
+/** Saldo (debido − pagado) acumulado de todos los meses anteriores a year/month. Negativo = pagado de más. */
+function carry_in(int $year, int $month): float {
+    $pdo = db(); $key = $year * 12 + $month;
+    $q = $pdo->prepare('SELECT COALESCE(SUM(ROUND(l.hours*l.hourly_rate,2)),0) FROM order_lines l JOIN orders o ON o.id = l.order_id WHERE o.year*12+o.month < ?');
+    $q->execute([$key]); $due = (float)$q->fetchColumn();
+    $q = $pdo->prepare('SELECT COALESCE(SUM(p.amount),0) FROM payments p JOIN orders o ON o.id = p.order_id WHERE o.year*12+o.month < ?');
+    $q->execute([$key]); $paid = (float)$q->fetchColumn();
+    return round($due - $paid, 2);
+}
+
 function order_state(int $year, int $month): array {
     $pdo = db();
     $st = $pdo->prepare('SELECT * FROM orders WHERE year = ? AND month = ?');
@@ -50,6 +60,7 @@ function order_state(int $year, int $month): array {
         'total' => $closed && $order['total'] !== null ? (float)$order['total'] : round($total, 2),
         'paid_total' => round($paid, 2),
         'holidays' => array_values(array_filter(holidays_for_year($year), fn($h) => (int)substr($h['date'], 5, 2) === $month)),
+        'carry_in' => carry_in($year, $month),
         'payments' => $payments,
         'paid_real' => round($paid_real, 2),
         'balance_all' => ['due' => round($due_all, 2), 'paid' => round($paid_all, 2), 'pending' => round($due_all - $paid_all, 2), 'unpaid_days' => (int)$pending],
@@ -91,7 +102,7 @@ try {
                                          'total' => round($total, 2), 'paid' => round((float)$r['paid'], 2)];
         }
         $years = $pdo->query('SELECT DISTINCT year FROM orders ORDER BY year DESC')->fetchAll(PDO::FETCH_COLUMN);
-        out(['year' => $y, 'months' => $months, 'years' => array_map('intval', $years)]);
+        out(['year' => $y, 'carry_in' => carry_in($y, 1), 'months' => $months, 'years' => array_map('intval', $years)]);
     }
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST' && $action !== 'holidays') out(['error' => 'Método no permitido'], 405);
@@ -105,6 +116,21 @@ try {
         $pdo->prepare('UPDATE settings SET hourly_rate = ?, default_hours = ?, region = ? WHERE id = 1')->execute([$rate, $hours, $region ?: null]);
         if ($changed) $pdo->exec("DELETE FROM holidays WHERE source = 'api'"); // se reimportan con la nueva comunidad
         out(['ok' => true, 'settings' => get_settings()]);
+    }
+
+    if ($action === 'set_mode') {
+        $demo = ($in['mode'] ?? '') === 'demo';
+        setcookie('hcc_mode', $demo ? 'demo' : 'real', ['expires' => time() + 86400 * 365, 'path' => '/', 'samesite' => 'Lax']);
+        out(['ok' => true, 'mode' => $demo ? 'demo' : 'real']);
+    }
+    if ($action === 'reset_demo') {
+        // Solo se puede borrar la base de pruebas, nunca la real
+        if (!is_demo()) out(['error' => 'Solo disponible en modo pruebas'], 409);
+        $name = active_db_name();
+        if ($name === DB_NAME) out(['error' => 'Operación no permitida'], 409);
+        $pdo->exec('DROP DATABASE `' . $name . '`');
+        create_database($pdo, $name);
+        out(['ok' => true]);
     }
 
     if ($action === 'reset_data') {

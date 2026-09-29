@@ -8,18 +8,32 @@ defined('DB_USER') || define('DB_USER', 'root');
 defined('DB_PASS') || define('DB_PASS', '');
 defined('DB_NAME') || define('DB_NAME', 'home_clean_calculator');
 
+/** Modo de pruebas: se activa por navegador (cookie) desde Configuración y usa la base "<nombre>_demo". */
+function is_demo(): bool { return ($_COOKIE['hcc_mode'] ?? '') === 'demo'; }
+function active_db_name(): string { return DB_NAME . (is_demo() ? '_demo' : ''); }
+
 function db(): PDO {
     static $pdo = null;
     if ($pdo) return $pdo;
     $opts = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
     $pdo = new PDO('mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';charset=utf8mb4', DB_USER, DB_PASS, $opts);
-    $exists = $pdo->query("SHOW DATABASES LIKE '" . DB_NAME . "'")->fetchColumn();
-    if (!$exists) {
-        $pdo->exec(str_replace('home_clean_calculator', DB_NAME, file_get_contents(__DIR__ . '/schema.sql')));
-    }
-    $pdo->exec('USE `' . DB_NAME . '`');
+    $name = active_db_name();
+    $exists = $pdo->query("SHOW DATABASES LIKE '" . str_replace('_', '\\_', $name) . "'")->fetchColumn();
+    if (!$exists) create_database($pdo, $name);
+    $pdo->exec('USE `' . $name . '`');
     migrate($pdo);
     return $pdo;
+}
+
+/** Crea la base de datos con su esquema; la de pruebas se rellena además con demo/demo_data.sql. */
+function create_database(PDO $pdo, string $name): void {
+    $pdo->exec(str_replace('home_clean_calculator', $name, file_get_contents(__DIR__ . '/schema.sql')));
+    $demo = __DIR__ . '/demo/demo_data.sql';
+    if ($name === DB_NAME . '_demo' && is_file($demo)) {
+        $pdo->exec('USE `' . $name . '`');
+        migrate($pdo);
+        $pdo->exec(str_replace('home_clean_calculator', $name, file_get_contents($demo)));
+    }
 }
 
 function get_settings(): array {

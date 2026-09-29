@@ -121,7 +121,12 @@ function updateTotals() {
   const due = state.status === 'closed' ? state.total : total;
   $('due-total').textContent = fmt(due) + ' €';
   $('paid-real').textContent = fmt(state.paid_real) + ' €';
-  $('pending-total').textContent = fmt(due - state.paid_real) + ' €';
+  const carry = state.carry_in;
+  $('carry-in').textContent = fmt(carry) + ' €';
+  $('pending-total').textContent = fmt(carry + due - state.paid_real) + ' €';
+  $('carry-note').textContent = Math.abs(carry) < 0.005 ? '' : carry < 0
+    ? `El arrastre de ${fmt(-carry)} € viene de meses anteriores, donde se pagó de más: se descuenta de este mes.`
+    : `El arrastre de ${fmt(carry)} € viene de meses anteriores, donde quedó algo sin pagar: se suma a este mes.`;
   const b = state.balance_all, pend = b.pending;
   $('balance-all').innerHTML = `<b>Saldo acumulado (todos los meses):</b> ` + (Math.abs(pend) < 0.005
     ? 'estás al día ✓'

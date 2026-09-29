@@ -63,3 +63,17 @@ rf.onsubmit = async e => {
   toast(ok ? 'Datos borrados ✓' : d.error, !ok);
   if (ok) setTimeout(() => location.reload(), 900);
 };
+
+// --- Cambio de base de datos (real / pruebas) ---
+const modeBtn = document.getElementById('mode-btn');
+modeBtn.onclick = async () => {
+  await post({action: 'set_mode', mode: modeBtn.dataset.mode});
+  location.reload();
+};
+const demoReset = document.getElementById('demo-reset');
+if (demoReset) demoReset.onclick = async () => {
+  demoReset.disabled = true;
+  const {ok, d} = await post({action: 'reset_demo'});
+  toast(ok ? 'Datos de ejemplo restaurados ✓' : d.error, !ok);
+  demoReset.disabled = false;
+};
