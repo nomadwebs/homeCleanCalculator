@@ -1,18 +1,21 @@
 <?php
 // Conexión local a XAMPP. Crea la base de datos y las tablas la primera vez.
-const DB_HOST = '127.0.0.1';
-const DB_USER = 'root';
-const DB_PASS = '';
-const DB_NAME = 'home_clean_calculator';
+// Los ajustes de conexión viven en config.php (copia de config.sample.php). Si no existe, se usan los de XAMPP por defecto.
+if (file_exists(__DIR__ . '/config.php')) require __DIR__ . '/config.php';
+defined('DB_HOST') || define('DB_HOST', '127.0.0.1');
+defined('DB_PORT') || define('DB_PORT', 3306);
+defined('DB_USER') || define('DB_USER', 'root');
+defined('DB_PASS') || define('DB_PASS', '');
+defined('DB_NAME') || define('DB_NAME', 'home_clean_calculator');
 
 function db(): PDO {
     static $pdo = null;
     if ($pdo) return $pdo;
     $opts = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC];
-    $pdo = new PDO('mysql:host=' . DB_HOST . ';charset=utf8mb4', DB_USER, DB_PASS, $opts);
+    $pdo = new PDO('mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';charset=utf8mb4', DB_USER, DB_PASS, $opts);
     $exists = $pdo->query("SHOW DATABASES LIKE '" . DB_NAME . "'")->fetchColumn();
     if (!$exists) {
-        $pdo->exec(file_get_contents(__DIR__ . '/schema.sql'));
+        $pdo->exec(str_replace('home_clean_calculator', DB_NAME, file_get_contents(__DIR__ . '/schema.sql')));
     }
     $pdo->exec('USE `' . DB_NAME . '`');
     migrate($pdo);

@@ -107,6 +107,23 @@ try {
         out(['ok' => true, 'settings' => get_settings()]);
     }
 
+    if ($action === 'reset_data') {
+        // Doble comprobación también en el servidor: hay que enviar la frase exacta
+        $phrase = mb_strtolower(trim($in['confirm'] ?? ''));
+        if (!in_array($phrase, ['sí borrar', 'si borrar'], true)) out(['error' => 'Falta la confirmación'], 400);
+        $pdo->beginTransaction();
+        $pdo->exec('DELETE FROM payments');
+        $pdo->exec('DELETE FROM order_lines');
+        $pdo->exec('DELETE FROM orders');
+        if (!empty($in['everything'])) {
+            $pdo->exec('DELETE FROM holidays');
+            $pdo->exec('UPDATE settings SET hourly_rate = 10.00, default_hours = 4.00, region = NULL WHERE id = 1');
+        }
+        $pdo->commit();
+        foreach (['payments', 'order_lines', 'orders'] as $t) $pdo->exec("ALTER TABLE $t AUTO_INCREMENT = 1");
+        out(['ok' => true]);
+    }
+
     if ($action === 'holidays') {
         $y = (int)($_GET['year'] ?? $in['year'] ?? date('Y'));
         out(['year' => $y, 'holidays' => holidays_for_year($y), 'regions' => REGIONS]);

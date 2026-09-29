@@ -47,3 +47,19 @@ function toast(msg, err) {
   setTimeout(() => t.className = '', 2500);
 }
 loadHolidays();
+
+// --- Borrar todos los datos (doble confirmación) ---
+const rm = document.getElementById('reset-modal'), rf = document.getElementById('reset-form'), go = document.getElementById('reset-go');
+const norm = t => t.trim().toLowerCase();
+const step1 = document.getElementById('reset-step1');
+document.getElementById('reset-btn').onclick = () => { rf.reset(); go.disabled = true; step1.hidden = false; rf.hidden = true; rm.hidden = false; };
+document.getElementById('reset-next').onclick = () => { step1.hidden = true; rf.hidden = false; rf.phrase.focus(); };
+document.querySelectorAll('.reset-cancel').forEach(b => b.onclick = () => rm.hidden = true);
+rf.phrase.oninput = () => go.disabled = !['sí borrar', 'si borrar'].includes(norm(rf.phrase.value));
+rf.onsubmit = async e => {
+  e.preventDefault();
+  const {ok, d} = await post({action: 'reset_data', confirm: rf.phrase.value, everything: rf.everything.checked});
+  rm.hidden = true;
+  toast(ok ? 'Datos borrados ✓' : d.error, !ok);
+  if (ok) setTimeout(() => location.reload(), 900);
+};

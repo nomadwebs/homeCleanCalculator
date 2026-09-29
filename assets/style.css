@@ -92,3 +92,5 @@ label.chk input{width:18px;margin:0}
 .hol-list small{color:var(--mut)}
 #s-payments h3{font-size:.95rem;margin:14px 0 4px}.prow{display:flex;gap:12px;padding:5px 0;border-bottom:1px solid var(--line)}.prow span:nth-child(2){flex:1;color:var(--mut)}
 .modal label.chk{display:flex;margin:6px 0}
+.danger{border-color:var(--err)}.danger h2{color:var(--err)}
+.danger-btn{background:var(--err);color:#fff;border-color:var(--err);font-weight:600}.danger-btn:disabled{opacity:.4}

@@ -38,4 +38,26 @@ page_head('Configuración · Limpieza', 'settings'); ?>
     <button class="primary" type="submit">Añadir</button>
   </form>
 </section>
+<section class="card narrow danger" style="margin-top:16px">
+  <h2>Zona de peligro</h2>
+  <p class="hint">Borra todos los pedidos, días y pagos registrados. No se puede deshacer: haz antes una copia de seguridad si quieres conservarlos.</p>
+  <button id="reset-btn" type="button" class="danger-btn">Borrar todos los datos…</button>
+</section>
+
+<div id="reset-modal" class="modal" hidden>
+  <div id="reset-step1" class="card">
+    <h2>¿Borrar todos los datos?</h2>
+    <p>Se eliminarán <b>todos los pedidos, días trabajados y pagos</b>. Esta acción no se puede deshacer.</p>
+    <div class="actions"><button type="button" class="reset-cancel">Cancelar</button><button type="button" id="reset-next" class="danger-btn">Sí, continuar</button></div>
+  </div>
+  <form id="reset-form" class="card" hidden>
+    <h2>⚠️ Confirmación final</h2>
+    <p>Última oportunidad: una vez borrado, no hay vuelta atrás.</p>
+    <label class="chk"><input type="checkbox" name="everything"> Borrar también la configuración (tarifa, horas, comunidad) y los festivos</label>
+    <label>Para confirmar, escribe <b>sí borrar</b>
+      <input type="text" name="phrase" autocomplete="off" placeholder="sí borrar">
+    </label>
+    <div class="actions"><button type="button" class="reset-cancel">Cancelar</button><button class="danger-btn" id="reset-go" type="submit" disabled>Borrar definitivamente</button></div>
+  </form>
+</div>
 <?php page_foot('settings.js');

@@ -1,0 +1,9 @@
+# Impide descargar ficheros sensibles desde el navegador
+<FilesMatch "(^config(\.sample)?\.php$|\.sql$|\.md$)">
+  Require all denied
+</FilesMatch>
+
+# Opcional: permitir el acceso SOLO desde este mismo ordenador (quita el # de las 2 líneas siguientes)
+# <RequireAll>
+#   Require local
+# </RequireAll>
