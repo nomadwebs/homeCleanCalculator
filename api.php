@@ -201,7 +201,7 @@ try {
         if (!empty($in['everything'])) {
             $pdo->exec('DELETE FROM holidays');
             $pdo->exec('DELETE FROM workers');
-            $pdo->exec("INSERT INTO workers (id, name) VALUES (1, 'Limpiadora')");
+            $pdo->exec("INSERT INTO workers (id, name) VALUES (1, 'Limpieza')");
             $pdo->exec('UPDATE settings SET region = NULL WHERE id = 1');
         }
         $pdo->commit();

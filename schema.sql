@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS settings (
 ) ENGINE=InnoDB;
 INSERT IGNORE INTO settings (id) VALUES (1);
 
--- Personas a las que se paga (limpiadora, canguro...), cada una con su tarifa y sus horas por defecto
+-- Personas a las que se paga (limpieza, canguro...), cada una con su tarifa y sus horas por defecto
 CREATE TABLE IF NOT EXISTS workers (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(60) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS workers (
   default_hours DECIMAL(4,2) NOT NULL DEFAULT 4.00,
   color VARCHAR(7) NOT NULL DEFAULT '#0f766e'
 ) ENGINE=InnoDB;
-INSERT IGNORE INTO workers (id, name) VALUES (1, 'Limpiadora');
+INSERT IGNORE INTO workers (id, name) VALUES (1, 'Limpieza');
 
 -- Un pedido por persona y mes
 CREATE TABLE IF NOT EXISTS orders (

@@ -1,12 +1,12 @@
 # 🧹 Home Clean Calculator
 
-Aplicación web sencilla para **llevar el control de lo que cuestan las personas que trabajan en tu casa** (limpiadora, canguro…): marcas en un calendario los días que han venido, la app calcula lo que se le debe, y registras los pagos (aunque no sean exactos, por falta de cambio o redondeos) para saber siempre **cuánto queda pendiente**.
+Aplicación web sencilla para **llevar el control de lo que cuestan las personas que trabajan en tu casa** (limpieza, canguro…): marcas en un calendario los días que han venido, la app calcula lo que se le debe, y registras los pagos (aunque no sean exactos, por falta de cambio o redondeos) para saber siempre **cuánto queda pendiente**.
 
 Pensada para usarse **en local, en tu propio ordenador**: sin registro, sin login, sin servicios en la nube. Solo PHP + MySQL/MariaDB, HTML, CSS y JavaScript (sin frameworks).
 
 ## ✨ Qué hace
 
-- 👥 **Varias personas** (limpiadora, canguro…): cada una con su propio calendario, tarifa, horas por defecto, pagos y saldo. Se cambia de persona con los botones de arriba, y **cada una tiene su color** (que tiñe toda la pantalla) para no equivocarse de calendario.
+- 👥 **Varias personas** (limpieza, canguro…): cada una con su propio calendario, tarifa, horas por defecto, pagos y saldo. Se cambia de persona con los botones de arriba, y **cada una tiene su color** (que tiñe toda la pantalla) para no equivocarse de calendario.
 - 🧾 **Gastos adicionales**: en cada día puedes añadir un extra con su concepto (merienda, transporte…) que se suma al importe.
 - 📅 **Calendario mensual**: toca un día para añadirlo al pedido del mes; tócalo otra vez para quitarlo.
 - ⚡ **Cálculo automático**: cada día usa por defecto la tarifa y las horas de la configuración, y las puedes editar en cada línea. Los totales se actualizan y se guardan al momento.
@@ -23,9 +23,9 @@ _Con los datos de ejemplo incluidos en el repositorio (personas y cifras fictici
 
 **Calendario y pedido del mes**: cada persona tiene su color. Los días en gris ya están pagados.
 
-| Limpiadora | Canguro (con gastos extra) |
+| Limpieza | Canguro (con gastos extra) |
 |---|---|
-| ![Calendario de la limpiadora](docs/screenshots/calendario-limpiadora.jpg) | ![Calendario de la canguro con gastos extra](docs/screenshots/calendario-canguro-extras.jpg) |
+| ![Calendario de limpieza](docs/screenshots/calendario-limpieza.jpg) | ![Calendario de la canguro con gastos extra](docs/screenshots/calendario-canguro-extras.jpg) |
 
 **Registrar un pago** (aunque no sea exacto) · **Historial anual** · **Personas y colores**
 
@@ -72,13 +72,13 @@ Entra en tu navegador a:
 
 ¡Ya está! **La base de datos y las tablas se crean solas** la primera vez que abres la página. No tienes que importar nada.
 
-Lo primero que conviene hacer: ir a **Configuración**, ajustar la **tarifa por hora** y las **horas por visita** de la primera persona (viene como «Limpiadora»; puedes renombrarla), añadir más personas si hace falta y elegir tu **comunidad autónoma** (para los festivos).
+Lo primero que conviene hacer: ir a **Configuración**, ajustar la **tarifa por hora** y las **horas por visita** de la primera persona (viene como «Limpieza»; puedes renombrarla), añadir más personas si hace falta y elegir tu **comunidad autónoma** (para los festivos).
 
 ---
 
 ## 🧪 Probar con datos de ejemplo
 
-Si quieres ver la app con datos antes de meter los tuyos, hay un fichero con datos ficticios (una limpiadora y una canguro, con gastos extra, pagos redondeados y días pendientes): [`demo/demo_data.sql`](demo/demo_data.sql). Las capturas de este README salen de esos datos.
+Si quieres ver la app con datos antes de meter los tuyos, hay un fichero con datos ficticios (limpieza y canguro, con gastos extra, pagos redondeados y días pendientes): [`demo/demo_data.sql`](demo/demo_data.sql). Las capturas de este README salen de esos datos.
 
 **Con phpMyAdmin (sin comandos):**
 1. Abre la aplicación al menos una vez (así se crea la base de datos).

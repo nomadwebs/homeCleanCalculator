@@ -1,5 +1,5 @@
 -- Datos de EJEMPLO (ficticios) para probar la aplicación.
--- Persona 1 "Limpiadora": 12 €/h x 4 h por visita = 48 € por día.
+-- Persona 1 "Limpieza": 12 €/h x 4 h por visita = 48 € por día.
 -- Persona 2 "Canguro": 9 €/h x 2 h por visita = 18 € por día, con algún gasto extra (merienda).
 --
 -- Cómo usarlo: abre la aplicación una vez (así se crea la base de datos) e importa este
@@ -10,7 +10,7 @@
 
 USE home_clean_calculator;
 
-UPDATE workers SET name = 'Limpiadora', hourly_rate = 12, default_hours = 4, color = '#0f766e' WHERE id = 1;
+UPDATE workers SET name = 'Limpieza', hourly_rate = 12, default_hours = 4, color = '#0f766e' WHERE id = 1;
 INSERT IGNORE INTO workers (id, name, hourly_rate, default_hours, color) VALUES (2, 'Canguro', 9, 2, '#b45309');
 
 INSERT INTO orders (worker_id,year,month,status,total,closed_at) VALUES (1,2026,1,'closed',384.00,'2026-01-28 20:00:00');

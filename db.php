@@ -85,7 +85,7 @@ function migrate(PDO $pdo): void {
             $s = $pdo->query('SELECT hourly_rate, default_hours FROM settings WHERE id = 1')->fetch();
             if ($s) { $rate = (float)$s['hourly_rate']; $hours = (float)$s['default_hours']; }
         }
-        $pdo->prepare("INSERT INTO workers (id, name, hourly_rate, default_hours) VALUES (1, 'Limpiadora', ?, ?)")->execute([$rate, $hours]);
+        $pdo->prepare("INSERT INTO workers (id, name, hourly_rate, default_hours) VALUES (1, 'Limpieza', ?, ?)")->execute([$rate, $hours]);
     }
     if (!$has('orders', 'worker_id')) {
         $pdo->exec('ALTER TABLE orders ADD worker_id INT UNSIGNED NOT NULL DEFAULT 1 AFTER id');
