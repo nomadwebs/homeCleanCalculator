@@ -6,25 +6,26 @@ const now = new Date();
 const year = +q.get('year') || now.getFullYear(), month = +q.get('month') || now.getMonth() + 1;
 
 (async () => {
-  const s = await (await fetch(`api.php?action=state&year=${year}&month=${month}`)).json();
+  const s = await (await fetch(`api.php?action=state&year=${year}&month=${month}&worker=${HCC.worker.id}`)).json();
   const closed = s.status === 'closed';
-  $('s-title').textContent = `${MONTHS[month-1]} ${year}`;
+  $('s-title').textContent = `${MONTHS[month-1]} ${year} · ${HCC.worker.name}`;
   $('s-back').href = `index.php?year=${year}&month=${month}`;
   const st = $('s-status'); st.textContent = closed ? 'Cerrado' : 'Abierto (provisional)'; st.className = 'badge ' + s.status;
   const hol = Object.fromEntries(s.holidays.map(h => [h.date, h.name]));
-  const amt = l => Math.round(l.hours * l.rate * 100) / 100;
+  const amt = l => Math.round((l.hours * l.rate + l.extra) * 100) / 100;
   $('s-lines').style.display = s.lines.length ? '' : 'none';
   $('s-empty').style.display = s.lines.length ? 'none' : '';
   $('s-lines').querySelector('tbody').innerHTML = s.lines.map(l => {
     const [y, m, d] = l.date.split('-').map(Number);
     const wd = new Date(y, m-1, d).toLocaleDateString('es-ES', {weekday: 'long', day: 'numeric'});
-    return `<tr><td>${wd}${hol[l.date] ? ' <em title="Festivo">(festivo)</em>' : ''}</td><td class="r">${l.hours.toLocaleString('es-ES')}</td>
-      <td class="r">${fmt(l.rate)}</td><td class="r">${fmt(amt(l))}</td><td>${l.paid ? '✔ Pagado' : 'Pendiente'}</td></tr>`;
+    const note = (l.extra_note || '').replace(/</g, '&lt;');
+    return `<tr><td>${wd}${hol[l.date] ? ' <em title="Festivo">(festivo)</em>' : ''}${l.extra > 0 && note ? `<br><small class="mut">${note}</small>` : ''}</td><td class="r">${l.hours.toLocaleString('es-ES')}</td>
+      <td class="r">${fmt(l.rate)}</td><td class="r">${l.extra > 0 ? fmt(l.extra) : '—'}</td><td class="r">${fmt(amt(l))}</td><td>${l.paid ? '✔ Pagado' : 'Pendiente'}</td></tr>`;
   }).join('');
   const hours = s.lines.reduce((a, l) => a + l.hours, 0);
   const total = closed ? s.total : s.lines.reduce((a, l) => a + amt(l), 0);
   const paid = s.paid_real;
-  $('s-lines').querySelector('tfoot').innerHTML = `<tr><td>${s.lines.length} día${s.lines.length === 1 ? '' : 's'}</td><td class="r">${hours.toLocaleString('es-ES')}</td><td></td><td class="r">${fmt(total)}</td><td></td></tr>`;
+  $('s-lines').querySelector('tfoot').innerHTML = `<tr><td>${s.lines.length} día${s.lines.length === 1 ? '' : 's'}</td><td class="r">${hours.toLocaleString('es-ES')}</td><td></td><td class="r">${fmt(s.lines.reduce((a, l) => a + l.extra, 0))}</td><td class="r">${fmt(total)}</td><td></td></tr>`;
   const carry = s.carry_in;
   $('s-boxes').innerHTML = `<div><span>Arrastre anterior</span><b>${fmt(carry)}</b></div><div><span>Total del mes</span><b>${fmt(total)}</b></div>
     <div><span>Pagado realmente</span><b>${fmt(paid)}</b></div>

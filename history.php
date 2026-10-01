@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/partials.php';
-page_head('Historial · Limpieza', 'history'); ?>
+page_head('Historial · Gastos del hogar', 'history'); ?>
 <section class="card">
   <div class="cal-head">
     <button id="prev" aria-label="Año anterior">‹</button>
@@ -18,6 +18,11 @@ page_head('Historial · Limpieza', 'history'); ?>
     <thead><tr><th>Mes</th><th class="r">Días</th><th class="r">Horas</th><th class="r">Total</th><th class="r">Pagado real</th><th class="r">Diferencia</th><th class="r">Saldo acumulado</th><th>Estado</th></tr></thead>
     <tbody></tbody>
     <tfoot></tfoot>
+  </table>
+  <h2 style="margin-top:22px">Resumen del año de todas las personas</h2>
+  <table id="people">
+    <thead><tr><th>Persona</th><th class="r">Total</th><th class="r">Pagado real</th><th class="r">Diferencia</th></tr></thead>
+    <tbody></tbody><tfoot></tfoot>
   </table>
   <p class="hint"><b>Diferencia</b> = total del mes − pagado realmente. <b>Saldo acumulado</b> = diferencia del mes + lo arrastrado de los meses anteriores. Positivo: queda por pagar; negativo: pagado de más.</p>
 </section>

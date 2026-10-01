@@ -2,17 +2,53 @@
 require __DIR__ . '/db.php';
 require __DIR__ . '/partials.php';
 $s = get_settings();
-page_head('Configuración · Limpieza', 'settings'); ?>
+$PALETTE = ['#0f766e' => 'Verde azulado', '#b45309' => 'Naranja', '#7c3aed' => 'Violeta', '#be123c' => 'Rojo',
+            '#1d4ed8' => 'Azul', '#4d7c0f' => 'Verde', '#be185d' => 'Rosa', '#475569' => 'Gris'];
+$workers = list_workers();
+$usedBy = [];
+foreach ($workers as $w) $usedBy[strtolower($w['color'])] = $w;
+/** Selector de color: los colores ya usados por otra persona aparecen tachados y no se pueden elegir. */
+function swatches(array $palette, array $usedBy, string $selected, int $selfId): void { ?>
+  <div class="color-pick"><span class="lbl">Color de esta persona:</span>
+  <?php foreach ($palette as $hex => $label):
+      $other = $usedBy[$hex] ?? null; $taken = $other && $other['id'] !== $selfId; ?>
+    <label class="sw <?= $taken ? 'taken' : '' ?>" title="<?= $label . ($taken ? ' — en uso por ' . htmlspecialchars($other['name']) : '') ?>">
+      <input type="radio" name="color" value="<?= $hex ?>" <?= strcasecmp($selected, $hex) === 0 ? 'checked' : '' ?> <?= $taken ? 'disabled' : '' ?>>
+      <span style="--c: <?= $hex ?>"></span>
+    </label>
+  <?php endforeach; ?></div>
+<?php }
+page_head('Configuración · Gastos del hogar', 'settings'); ?>
 <section class="card narrow">
-  <h2>Configuración general</h2>
-  <p class="hint">Valores por defecto para los días nuevos. Cada línea del pedido se puede editar después; los cambios aquí no afectan a los días ya añadidos.</p>
+  <h2>Personas</h2>
+  <p class="hint">Cada persona tiene su propio calendario, tarifa, pagos y saldo. La tarifa y las horas son los valores por defecto de los días nuevos; cada línea se puede editar después y los cambios no afectan a los días ya añadidos.</p>
+  <?php foreach ($workers as $w): ?>
+  <form class="worker-row" data-id="<?= $w['id'] ?>" style="--c: <?= htmlspecialchars($w['color']) ?>">
+    <div class="f">
+      <label>Nombre<input type="text" name="name" value="<?= htmlspecialchars($w['name']) ?>" maxlength="60" required></label>
+      <label>€ / hora<input type="number" name="hourly_rate" step="0.01" min="0" value="<?= $w['hourly_rate'] ?>" required></label>
+      <label>Horas por visita<input type="number" name="default_hours" step="0.25" min="0.25" max="24" value="<?= $w['default_hours'] ?>" required></label>
+    </div>
+    <?php swatches($PALETTE, $usedBy, $w['color'], $w['id']); ?>
+    <div class="actions"><button class="primary" type="submit">Guardar</button><button type="button" class="w-del">Eliminar</button></div>
+  </form>
+  <?php endforeach; ?>
+  <details style="margin-top:12px"><summary>➕ Añadir otra persona (canguro, jardinero…)</summary>
+    <form id="worker-add" class="worker-row" style="--c: #0f766e">
+      <div class="f">
+        <label>Nombre<input type="text" name="name" maxlength="60" placeholder="Canguro" required></label>
+        <label>€ / hora<input type="number" name="hourly_rate" step="0.01" min="0" value="10" required></label>
+        <label>Horas por visita<input type="number" name="default_hours" step="0.25" min="0.25" max="24" value="2" required></label>
+      </div>
+      <?php $free = array_key_first(array_diff_key($PALETTE, $usedBy)) ?? array_key_first($PALETTE); swatches($PALETTE, $usedBy, $free, 0); ?>
+      <div class="actions"><button class="primary" type="submit">Añadir persona</button></div>
+    </form>
+  </details>
+</section>
+
+<section class="card narrow" style="margin-top:16px">
+  <h2>General</h2>
   <form id="settings-form">
-    <label>Tarifa por hora (€)
-      <input type="number" name="hourly_rate" step="0.01" min="0" value="<?= $s['hourly_rate'] ?>" required>
-    </label>
-    <label>Horas por defecto por visita
-      <input type="number" name="default_hours" step="0.25" min="0.25" max="24" value="<?= $s['default_hours'] ?>" required>
-    </label>
     <label>Comunidad autónoma (para los festivos)
       <select name="region">
         <option value="">Solo festivos nacionales</option>
@@ -64,7 +100,7 @@ page_head('Configuración · Limpieza', 'settings'); ?>
   <form id="reset-form" class="card" hidden>
     <h2>⚠️ Confirmación final</h2>
     <p>Última oportunidad: una vez borrado, no hay vuelta atrás.</p>
-    <label class="chk"><input type="checkbox" name="everything"> Borrar también la configuración (tarifa, horas, comunidad) y los festivos</label>
+    <label class="chk"><input type="checkbox" name="everything"> Borrar también las personas (se queda solo una con valores por defecto), la comunidad y los festivos</label>
     <label>Para confirmar, escribe <b>sí borrar</b>
       <input type="text" name="phrase" autocomplete="off" placeholder="sí borrar">
     </label>

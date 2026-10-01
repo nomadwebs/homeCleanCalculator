@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/partials.php';
-page_head('Calendario · Limpieza', 'home'); ?>
+page_head('Calendario · Gastos del hogar', 'home'); ?>
 <div class="grid">
   <section class="card">
     <div class="cal-head">
@@ -19,13 +19,13 @@ page_head('Calendario · Limpieza', 'home'); ?>
       <h2>Pedido de <span id="order-title"></span></h2>
       <span id="status" class="badge"></span>
     </div>
-    <table id="lines">
-      <thead><tr><th>Día</th><th>Horas</th><th>€/hora</th><th class="r">Importe</th><th title="Pagado">Pag.</th><th></th></tr></thead>
+    <div class="tscroll"><table id="lines">
+      <thead><tr><th>Día</th><th>Horas</th><th>€/hora</th><th title="Gasto adicional del día (merienda, transporte…)">Extra €</th><th class="r">Importe</th><th title="Pagado">Pag.</th><th></th></tr></thead>
       <tbody></tbody>
-    </table>
+    </table></div>
     <p id="empty" class="hint">Aún no hay días en este mes.</p>
     <div class="total">
-      <div><span id="sum-days">0</span> días · <span id="sum-hours">0</span> h</div>
+      <div><span id="sum-days">0</span> <span id="days-word">días</span> · <span id="sum-hours">0</span> h</div>
       <div class="amount"><span id="total">0,00</span> €</div>
     </div>
     <div class="pay-box four">

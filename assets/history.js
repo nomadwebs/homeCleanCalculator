@@ -4,8 +4,8 @@ const $ = id => document.getElementById(id);
 let year = new Date().getFullYear();
 
 async function load() {
-  const d = await (await fetch('api.php?action=history&year=' + year)).json();
-  $('year-title').textContent = year;
+  const d = await (await fetch('api.php?action=history&year=' + year + '&worker=' + HCC.worker.id)).json();
+  $('year-title').textContent = `${year} · ${HCC.worker.name}`;
   const ms = Object.entries(d.months).map(([m, v]) => ({m: +m, ...v}));
   const sum = k => ms.reduce((a, x) => a + x[k], 0);
   const total = sum('total'), paid = sum('paid');
@@ -25,6 +25,10 @@ async function load() {
       <td class="r">${x.status ? fmt(x.total - x.paid) : '—'}</td>
       <td class="r"><b>${x.status ? fmt(x.balance) : '—'}</b></td>
       <td>${x.status ? `<span class="badge ${x.status}">${x.status === 'closed' ? 'Cerrado' : 'Abierto'}</span>` : ''}</td></tr>`).join('');
+  const pt = d.people.reduce((a, p) => ({t: a.t + p.total, p: a.p + p.paid}), {t: 0, p: 0});
+  $('people').querySelector('tbody').innerHTML = d.people.map(p => `<tr><td><i class="dot" style="background:${p.color}"></i> ${p.name.replace(/</g, '&lt;')}</td>
+      <td class="r">${fmt(p.total)}</td><td class="r">${fmt(p.paid)}</td><td class="r">${fmt(p.total - p.paid)}</td></tr>`).join('');
+  $('people').querySelector('tfoot').innerHTML = `<tr><td>Todas las personas</td><td class="r">${fmt(pt.t)}</td><td class="r">${fmt(pt.p)}</td><td class="r">${fmt(pt.t - pt.p)}</td></tr>`;
   $('months').querySelector('tfoot').innerHTML = `<tr><td>Total</td><td class="r">${sum('days')}</td><td class="r">${sum('hours').toLocaleString('es-ES')}</td>
       <td class="r">${fmt(total)}</td><td class="r">${fmt(paid)}</td><td class="r">${fmt(total - paid)}</td><td class="r">${fmt(run)}</td><td></td></tr>`;
 }

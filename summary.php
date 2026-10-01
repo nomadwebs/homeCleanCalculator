@@ -1,13 +1,13 @@
 <?php
 require __DIR__ . '/partials.php';
-page_head('Resumen del mes · Limpieza', 'history'); ?>
+page_head('Resumen del mes · Gastos del hogar', 'history'); ?>
 <section class="card narrow wide" id="sheet">
   <div class="order-head">
     <h2>Resumen de <span id="s-title"></span></h2>
     <span id="s-status" class="badge"></span>
   </div>
   <table id="s-lines">
-    <thead><tr><th>Fecha</th><th class="r">Horas</th><th class="r">€/hora</th><th class="r">Importe</th><th>Pago</th></tr></thead>
+    <thead><tr><th>Fecha</th><th class="r">Horas</th><th class="r">€/hora</th><th class="r">Extra</th><th class="r">Importe</th><th>Pago</th></tr></thead>
     <tbody></tbody>
     <tfoot></tfoot>
   </table>

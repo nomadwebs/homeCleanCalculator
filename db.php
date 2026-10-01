@@ -37,8 +37,23 @@ function create_database(PDO $pdo, string $name): void {
 }
 
 function get_settings(): array {
-    $s = db()->query('SELECT hourly_rate, default_hours, region FROM settings WHERE id = 1')->fetch();
-    return ['hourly_rate' => (float)$s['hourly_rate'], 'default_hours' => (float)$s['default_hours'], 'region' => $s['region']];
+    $s = db()->query('SELECT region FROM settings WHERE id = 1')->fetch();
+    return ['region' => $s['region']];
+}
+
+/** Personas a las que se paga. */
+function list_workers(): array {
+    return array_map(fn($w) => ['id' => (int)$w['id'], 'name' => $w['name'], 'hourly_rate' => (float)$w['hourly_rate'],
+                                'default_hours' => (float)$w['default_hours'], 'color' => $w['color']],
+        db()->query('SELECT * FROM workers ORDER BY id')->fetchAll());
+}
+function get_worker(int $id): ?array {
+    foreach (list_workers() as $w) if ($w['id'] === $id) return $w;
+    return null;
+}
+/** Persona seleccionada en este navegador (cookie); si no hay o no existe, la primera. */
+function current_worker(): array {
+    return get_worker((int)($_COOKIE['hcc_worker'] ?? 0)) ?? list_workers()[0];
 }
 
 /** Actualiza bases de datos creadas con versiones anteriores del esquema. */
@@ -55,6 +70,31 @@ function migrate(PDO $pdo): void {
       CONSTRAINT fk_pay_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
     ) ENGINE=InnoDB");
     if (!$has('order_lines', 'payment_id')) $pdo->exec('ALTER TABLE order_lines ADD payment_id INT UNSIGNED NULL');
+    // --- Varias personas + gastos adicionales ---
+    $pdo->exec("CREATE TABLE IF NOT EXISTS workers (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(60) NOT NULL,
+      hourly_rate DECIMAL(8,2) NOT NULL DEFAULT 10.00,
+      default_hours DECIMAL(4,2) NOT NULL DEFAULT 4.00,
+      color VARCHAR(7) NOT NULL DEFAULT '#0f766e'
+    ) ENGINE=InnoDB");
+    if (!$pdo->query('SELECT 1 FROM workers LIMIT 1')->fetch()) {
+        // Los datos existentes pasan a la primera persona, con la tarifa que había en la configuración
+        $rate = 10.0; $hours = 4.0;
+        if ($has('settings', 'hourly_rate')) {
+            $s = $pdo->query('SELECT hourly_rate, default_hours FROM settings WHERE id = 1')->fetch();
+            if ($s) { $rate = (float)$s['hourly_rate']; $hours = (float)$s['default_hours']; }
+        }
+        $pdo->prepare("INSERT INTO workers (id, name, hourly_rate, default_hours) VALUES (1, 'Limpiadora', ?, ?)")->execute([$rate, $hours]);
+    }
+    if (!$has('orders', 'worker_id')) {
+        $pdo->exec('ALTER TABLE orders ADD worker_id INT UNSIGNED NOT NULL DEFAULT 1 AFTER id');
+        $pdo->exec('ALTER TABLE orders DROP INDEX uq_year_month, ADD UNIQUE KEY uq_worker_month (worker_id, year, month)');
+        $pdo->exec('ALTER TABLE orders ADD CONSTRAINT fk_order_worker FOREIGN KEY (worker_id) REFERENCES workers(id)');
+    }
+    if (!$has('order_lines', 'extra_amount')) {
+        $pdo->exec('ALTER TABLE order_lines ADD extra_amount DECIMAL(8,2) NOT NULL DEFAULT 0.00 AFTER hourly_rate, ADD extra_note VARCHAR(120) NULL AFTER extra_amount');
+    }
     $pdo->exec("CREATE TABLE IF NOT EXISTS holidays (
       id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       holiday_date DATE NOT NULL UNIQUE,

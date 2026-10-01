@@ -7,6 +7,7 @@ const qs = new URLSearchParams(location.search);
 let year = +qs.get('year') || cur.getFullYear(), month = +qs.get('month') || cur.getMonth() + 1;
 let state = null;
 const timers = {};
+const amtOf = l => Math.round((l.hours * l.rate + (l.extra || 0)) * 100) / 100;
 
 function toast(msg, err) {
   const t = $('toast'); t.textContent = msg; t.className = 'show' + (err ? ' err' : '');
@@ -14,14 +15,14 @@ function toast(msg, err) {
 }
 
 async function call(payload) {
-  const r = await fetch('api.php', {method: 'POST', body: JSON.stringify({year, month, ...payload})});
+  const r = await fetch('api.php', {method: 'POST', body: JSON.stringify({year, month, worker_id: HCC.worker.id, ...payload})});
   const d = await r.json();
   if (!r.ok) { toast(d.error || 'Error', true); await load(); return null; }
   return d;
 }
 
 async function load() {
-  const r = await fetch(`api.php?action=state&year=${year}&month=${month}`);
+  const r = await fetch(`api.php?action=state&year=${year}&month=${month}&worker=${HCC.worker.id}`);
   state = await r.json();
   render();
 }
@@ -29,7 +30,7 @@ async function load() {
 function render() {
   const closed = state.status === 'closed';
   $('month-title').textContent = `${MONTHS[month - 1]} ${year}`;
-  $('order-title').textContent = `${MONTHS[month - 1]} ${year}`;
+  $('order-title').textContent = `${MONTHS[month - 1]} ${year} · ${HCC.worker.name}`;
   renderCalendar(closed);
   renderLines(closed);
   $('holiday-list').innerHTML = state.holidays.map(h => `<li><span>${+h.date.slice(8)}</span> ${h.name.replace(/</g, '&lt;')}</li>`).join('');
@@ -81,10 +82,13 @@ function renderLines(closed) {
     tr.innerHTML = `<td>${wd} ${d}</td>
       <td><input class="h" type="number" step="0.25" min="0" max="24" value="${l.hours}" ${closed || l.paid ? 'disabled' : ''}></td>
       <td><input class="p" type="number" step="0.01" min="0" value="${l.rate}" ${closed || l.paid ? 'disabled' : ''}></td>
+      <td class="extra"><input class="e" type="number" step="0.01" min="0" value="${l.extra || ''}" placeholder="0" ${closed || l.paid ? 'disabled' : ''}>
+        <input class="en" type="text" maxlength="120" placeholder="concepto" value="" ${closed || l.paid ? 'disabled' : ''}></td>
       <td class="r amt"></td>
       <td><input class="pd" type="checkbox" ${l.paid ? 'checked' : ''} title="Registrar pago de este día"></td>
       <td>${closed || l.paid ? '' : '<button class="x" title="Quitar día">✕</button>'}</td>`;
-    tr.querySelectorAll('.h, .p').forEach(i => i.addEventListener('input', () => onEdit(l, tr)));
+    tr.querySelector('.en').value = l.extra_note || '';
+    tr.querySelectorAll('.h, .p, .e, .en').forEach(i => i.addEventListener('input', () => onEdit(l, tr)));
     tr.querySelector('.pd').onchange = async e => {
       if (e.target.checked) { e.target.checked = false; openPay([l.id]); return; }
       if (!confirm('¿Quitar la marca de pagado de este día? El dinero registrado en el pago se conserva.')) { e.target.checked = true; return; }
@@ -101,10 +105,12 @@ function renderLines(closed) {
 function onEdit(l, tr) {
   l.hours = parseFloat(tr.querySelector('.h').value) || 0;
   l.rate = parseFloat(tr.querySelector('.p').value) || 0;
+  l.extra = parseFloat(tr.querySelector('.e').value) || 0;
+  l.extra_note = tr.querySelector('.en').value;
   updateTotals();
   clearTimeout(timers[l.id]);
   timers[l.id] = setTimeout(async () => {
-    const s = await call({action: 'update_line', id: l.id, hours: l.hours, rate: l.rate});
+    const s = await call({action: 'update_line', id: l.id, hours: l.hours, rate: l.rate, extra: l.extra, extra_note: l.extra_note});
     if (s) { state.total = s.total; updateTotals(); toast('Guardado ✓'); }
   }, 400);
 }
@@ -113,7 +119,7 @@ function updateTotals() {
   let total = 0, hours = 0;
   document.querySelectorAll('#lines tbody tr').forEach(tr => {
     const l = state.lines.find(x => x.id == tr.dataset.id);
-    const amt = Math.round(l.hours * l.rate * 100) / 100;
+    const amt = amtOf(l);
     tr.querySelector('.amt').textContent = fmt(amt) + ' €';
     total += amt; hours += l.hours;
   });
@@ -142,17 +148,18 @@ function updateTotals() {
   });
   $('pay-btn').disabled = false;
   $('sum-days').textContent = state.lines.length;
+  $('days-word').textContent = state.lines.length === 1 ? 'día' : 'días';
   $('sum-hours').textContent = hours.toLocaleString('es-ES');
 }
 
 $('close-btn').onclick = async () => {
-  if (state.status === 'open' && !confirm(`¿Cerrar el pedido de ${MONTHS[month-1]}? Quedará bloqueado con un total de ${fmt(state.lines.reduce((a,l)=>a+Math.round(l.hours*l.rate*100)/100,0))} €.`)) return;
+  if (state.status === 'open' && !confirm(`¿Cerrar el pedido de ${MONTHS[month-1]}? Quedará bloqueado con un total de ${fmt(state.lines.reduce((a,l)=>a+amtOf(l),0))} €.`)) return;
   const s = await call({action: state.status === 'open' ? 'close' : 'reopen'});
   if (s) { state = s; render(); }
 };
 // --- Registro de pagos ---
 const modal = $('modal'), pf = $('pay-form');
-const lineAmt = l => Math.round(l.hours * l.rate * 100) / 100;
+const lineAmt = amtOf;
 function selectedDue() {
   return [...document.querySelectorAll('#pay-lines input:checked')].reduce((a, c) => a + lineAmt(state.lines.find(l => l.id == c.value)), 0);
 }

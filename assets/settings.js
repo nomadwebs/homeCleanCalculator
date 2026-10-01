@@ -77,3 +77,32 @@ if (demoReset) demoReset.onclick = async () => {
   toast(ok ? 'Datos de ejemplo restaurados ✓' : d.error, !ok);
   demoReset.disabled = false;
 };
+
+// --- Personas ---
+const formData = f => { const o = Object.fromEntries(new FormData(f)); return o; };
+document.querySelectorAll('form.worker-row[data-id]').forEach(f => {
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const {ok, d} = await post({action: 'save_worker', id: +f.dataset.id, ...formData(f)});
+    toast(ok ? 'Guardado ✓' : d.error, !ok);
+    if (ok) setTimeout(() => location.reload(), 600);
+  };
+  const del = f.querySelector('.w-del');
+  del.onclick = async () => {
+    if (!del.dataset.sure) {           // primer clic: pide confirmar; segundo clic: elimina
+      del.dataset.sure = 1; del.textContent = '¿Seguro? Pulsa otra vez'; del.classList.add('danger-btn');
+      setTimeout(() => { delete del.dataset.sure; del.textContent = 'Eliminar'; del.classList.remove('danger-btn'); }, 4000);
+      return;
+    }
+    const {ok, d} = await post({action: 'delete_worker', id: +f.dataset.id});
+    if (!ok) return toast(d.error, true);
+    location.reload();
+  };
+});
+document.getElementById('worker-add').onsubmit = async e => {
+  e.preventDefault();
+  const {ok, d} = await post({action: 'add_worker', ...formData(e.target)});
+  if (!ok) return toast(d.error, true);
+  await post({action: 'set_worker', id: d.id});
+  location.reload();
+};

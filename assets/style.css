@@ -95,3 +95,33 @@ label.chk input{width:18px;margin:0}
 .danger{border-color:var(--err)}.danger h2{color:var(--err)}
 .danger-btn{background:var(--err);color:#fff;border-color:var(--err);font-weight:600}.danger-btn:disabled{opacity:.4}
 .demo-banner{background:#f59e0b;color:#1c1300;text-align:center;padding:6px 12px;font-size:.88rem}.demo-banner a{color:inherit;font-weight:700}
+
+/* Personas */
+.top{border-top:5px solid var(--wc,var(--acc))}
+.who{display:flex;gap:6px;flex-wrap:wrap}
+.who button{border-radius:999px;padding:6px 14px;border:2px solid var(--c);color:var(--ink);font-weight:600}
+.who button.on{background:var(--c);color:#fff}
+.tscroll{overflow-x:auto}
+td.extra{min-width:110px}td.extra input{display:block;max-width:none;margin-bottom:3px}td.extra .en{font-size:.78rem;padding:4px 6px}
+.worker-row{border:1px solid var(--line);border-left:6px solid var(--c);border-radius:10px;padding:10px;margin:10px 0}
+.worker-row .f{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px}
+@media (max-width:520px){.worker-row .f{grid-template-columns:1fr 1fr}.worker-row .f label:first-child{grid-column:1/-1}}
+.worker-row label{margin:0}
+.swatches{display:flex;gap:6px;margin-top:8px;align-items:center}
+.swatches input{display:none}
+.swatches span{width:22px;height:22px;border-radius:50%;background:var(--c);display:inline-block;cursor:pointer;border:2px solid transparent}
+.swatches input:checked+span{border-color:var(--ink);box-shadow:0 0 0 2px var(--card) inset}
+h2{text-transform:none}#month-title{text-transform:capitalize}
+
+/* El color de la persona activa tiñe toda la interfaz */
+body{--acc:var(--wc,#0f766e);--acc-ink:#fff}
+.top{background:color-mix(in srgb,var(--wc,#0f766e) 9%,var(--card))}
+.color-pick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+.color-pick .lbl{font-size:.85rem;color:var(--mut);margin-right:2px}
+.color-pick label.sw{margin:0;display:block;cursor:pointer}
+.color-pick label.sw input{display:none}
+.color-pick label.sw span{display:block;width:30px;height:30px;border-radius:50%;background:var(--c);border:3px solid transparent}
+.color-pick label.sw input:checked+span{border-color:var(--ink);box-shadow:0 0 0 3px var(--card) inset}
+.color-pick label.sw.taken{cursor:not-allowed}
+.color-pick label.sw.taken span{opacity:.25;position:relative}
+.color-pick label.sw.taken span::after{content:'';position:absolute;left:50%;top:-3px;bottom:-3px;width:2px;background:var(--ink);transform:rotate(45deg)}
